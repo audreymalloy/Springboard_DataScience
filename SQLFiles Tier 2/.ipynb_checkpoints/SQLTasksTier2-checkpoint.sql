@@ -244,11 +244,161 @@ QUESTIONS:
 The output of facility name and total revenue, sorted by revenue. Remember
 that there's a different cost for guests and members! */
 
+SELECT 
+    Facilities.name AS facility_name, 
+    SUM(
+        CASE 
+            WHEN Bookings.memid = 0 THEN Facilities.guestcost * Bookings.slots
+            ELSE Facilities.membercost * Bookings.slots
+        END
+    ) AS total_revenue
+FROM 
+    Facilities
+JOIN 
+    Bookings ON Facilities.facid = Bookings.facid
+GROUP BY 
+    Facilities.name
+HAVING 
+    SUM(
+        CASE 
+            WHEN Bookings.memid = 0 THEN Facilities.guestcost * Bookings.slots
+            ELSE Facilities.membercost * Bookings.slots
+        END
+    ) < 1000
+ORDER BY 
+    total_revenue;
+
+
+facility_name	total_revenue   	
+Table Tennis	180.0	
+Snooker Table	240.0	
+Pool Table	270.0	
+
+
 /* Q11: Produce a report of members and who recommended them in alphabetic surname,firstname order */
+
+SELECT 
+    m1.surname AS member_surname,
+    m1.firstname AS member_firstname,
+    m2.surname AS recommender_surname,
+    m2.firstname AS recommender_firstname
+FROM 
+    Members m1
+LEFT JOIN 
+    Members m2 ON m1.recommendedby = m2.memid
+ORDER BY 
+    m1.surname, m1.firstname;
+
+
+member_surname	member_firstname	recommender_surname	recommender_firstname	
+Bader	Florence	Stibbons	Ponder	
+Baker	Anne	Stibbons	Ponder	
+Baker	Timothy	Farrell	Jemima	
+Boothe	Tim	Rownam	Tim	
+Butters	Gerald	Smith	Darren	
+Coplin	Joan	Baker	Timothy	
+Crumpet	Erica	Smith	Tracy	
+Dare	Nancy	Joplette	Janice	
+Farrell	David	GUEST	GUEST	
+Farrell	Jemima	GUEST	GUEST	
+Genting	Matthew	Butters	Gerald	
+GUEST	GUEST	GUEST	GUEST	
+Hunt	John	Purview	Millicent	
+Jones	David	Joplette	Janice	
+Jones	Douglas	Jones	David	
+Joplette	Janice	Smith	Darren	
+Mackenzie	Anna	Smith	Darren	
+Owen	Charles	Smith	Darren	
+Pinker	David	Farrell	Jemima	
+Purview	Millicent	Smith	Tracy	
+Rownam	Tim	GUEST	GUEST	
+Rumney	Henrietta	Genting	Matthew	
+Sarwin	Ramnaresh	Bader	Florence	
+Smith	Darren	GUEST	GUEST	
+Smith	Darren	GUEST	GUEST	
+Smith	Jack	Smith	Darren	
+Smith	Tracy	GUEST	GUEST	
+Stibbons	Ponder	Tracy	Burton	
+Tracy	Burton	GUEST	GUEST	
+Tupperware	Hyacinth	GUEST	GUEST	
+Worthington-Smyth	Henry	Smith	Tracy	
 
 
 /* Q12: Find the facilities with their usage by member, but not guests */
 
 
+SELECT 
+    Facilities.name AS facility_name,
+    COUNT(Bookings.bookid) AS member_usage
+FROM 
+    Facilities
+JOIN 
+    Bookings ON Facilities.facid = Bookings.facid
+WHERE 
+    Bookings.memid != 0
+GROUP BY 
+    Facilities.name
+ORDER BY 
+    member_usage DESC;
+
+
+facility_name	member_usage   	
+Pool Table	783	
+Massage Room 1	421	
+Snooker Table	421	
+Table Tennis	385	
+Badminton Court	344	
+Tennis Court 1	308	
+Tennis Court 2	276	
+Squash Court	195	
+Massage Room 2	27	
+
+
 /* Q13: Find the facilities usage by month, but not guests */
+
+SELECT 
+    Facilities.name AS facility_name,
+    DATE_FORMAT(Bookings.starttime, '%Y-%m') AS month,
+    COUNT(Bookings.bookid) AS member_usage
+FROM 
+    Facilities
+JOIN 
+    Bookings ON Facilities.facid = Bookings.facid
+WHERE 
+    Bookings.memid != 0
+GROUP BY 
+    Facilities.name, month
+ORDER BY 
+    month, facility_name
+LIMIT 0, 100;
+
+
+facility_name   month   member_usage	
+Badminton Court	2012-07	51	
+Massage Room 1	2012-07	77	
+Massage Room 2	2012-07	4	
+Pool Table	2012-07	103	
+Snooker Table	2012-07	68	
+Squash Court	2012-07	23	
+Table Tennis	2012-07	48	
+Tennis Court 1	2012-07	65	
+Tennis Court 2	2012-07	41	
+Badminton Court	2012-08	132	
+Massage Room 1	2012-08	153	
+Massage Room 2	2012-08	9	
+Pool Table	2012-08	272	
+Snooker Table	2012-08	154	
+Squash Court	2012-08	85	
+Table Tennis	2012-08	143	
+Tennis Court 1	2012-08	111	
+Tennis Court 2	2012-08	109	
+Badminton Court	2012-09	161	
+Massage Room 1	2012-09	191	
+Massage Room 2	2012-09	14	
+Pool Table	2012-09	408	
+Snooker Table	2012-09	199	
+Squash Court	2012-09	87	
+Table Tennis	2012-09	194	
+Tennis Court 1	2012-09	132	
+Tennis Court 2	2012-09	126	
 
